@@ -15,9 +15,12 @@ import random
 
 # Import native Rust library
 try:
-    import ashmaize_py
-    NATIVE_ASHMAIZE = True
-    print("✓ Using NATIVE Rust Ashmaize (FAST)")
+    if sys.platform != "darwin":
+        import ashmaize_py
+        NATIVE_ASHMAIZE = True
+        print("✓ Using NATIVE Rust Ashmaize (FAST)")
+    else:
+        import ashmaize_py_mac as ashmaize_py
 except ImportError:
     print("Native ashmaize_py not found. Please create an Issue on github and tell me your Operating System and version so I can add support!")
     sys.exit(1)
