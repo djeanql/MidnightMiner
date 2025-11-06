@@ -665,11 +665,22 @@ GREEN = "\033[32m"
 def color_text(text, color):
     return f"{color}{text}{RESET}"
 
-def display_dashboard(status_dict, num_workers, wallet_manager, challenge_tracker, initial_completed, initial_night):
+def display_dashboard(status_dict, num_workers, wallet_manager, challenge_tracker, initial_completed, night_balance_dict, api_base):
     """Display live dashboard - worker-centric view"""
     while True:
         try:
             time.sleep(5)
+
+            # Check if we should update NIGHT balance (once per day after 2am UTC)
+            now_utc = datetime.now(timezone.utc)
+            last_update_str = night_balance_dict.get('last_update_date')
+            current_date = now_utc.date().isoformat()
+
+            # Update if: different date AND current time is after 2am UTC AND we haven't updated today
+            if now_utc.hour >= 2 and last_update_str != current_date:
+                new_balance = fetch_total_night_balance(wallet_manager, api_base)
+                night_balance_dict['balance'] = new_balance
+                night_balance_dict['last_update_date'] = current_date
 
             os.system('clear' if os.name == 'posix' else 'cls')
 
@@ -727,8 +738,9 @@ def display_dashboard(status_dict, num_workers, wallet_manager, challenge_tracke
             print()
             print(color_text(f"{'Total Hash Rate:':<20} {total_hashrate:.0f} H/s", CYAN))
             print(color_text(f"{'Total Completed:':<20} {completed_str}", CYAN))
-            print(color_text(f"{'Total NIGHT:':<20} {initial_night:.2f}", GREEN))
+            print(color_text(f"{'Total NIGHT*:':<20} {night_balance_dict['balance']:.2f}", GREEN))
             print("="*110)
+            print("*Night balance updates every 24h")
             print("\nPress Ctrl+C to stop all miners")
 
         except KeyboardInterrupt:
@@ -835,6 +847,11 @@ def main():
     manager = Manager()
     status_dict = manager.dict()
 
+    # NIGHT balance tracking with daily updates
+    night_balance_dict = manager.dict()
+    night_balance_dict['balance'] = initial_night
+    night_balance_dict['last_update_date'] = datetime.now(timezone.utc).date().isoformat()
+
     # Worker tracking: worker_id -> (process, wallet_data)
     workers = {}
     shutdown_event = threading.Event()
@@ -914,7 +931,7 @@ def main():
     logger.info(f"All {num_workers} workers started successfully")
 
     try:
-        display_dashboard(status_dict, num_workers, wallet_manager, challenge_tracker, initial_completed, initial_night)
+        display_dashboard(status_dict, num_workers, wallet_manager, challenge_tracker, initial_completed, night_balance_dict, api_base)
     except KeyboardInterrupt:
         print("\n\nStopping all miners...")
         logger.info("Received shutdown signal, stopping all workers...")
