@@ -97,6 +97,7 @@ If solutions fail to submit (network issues, API errors), they're saved to `solu
 py resubmit_solutions.py
 ```
 Successfully submitted solutions are automatically removed from the file.
+You should run this once a day, as solutions can no longer be submitted after 24 hours.
 
 ## Claiming NIGHT
 

@@ -65,6 +65,7 @@ If solutions fail to submit due to network issues or API errors, they are automa
 python resubmit_solutions.py
 ```
 The script automatically removes successfully submitted solutions and keeps any that still failed for retry.
+You should run this once a day, as solutions can no longer be submitted after 24 hours.
 
 ## ⚠️ Update Regularly
 
