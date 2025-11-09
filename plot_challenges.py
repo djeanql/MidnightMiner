@@ -9,8 +9,17 @@ import matplotlib.dates as mdates
 
 def plot_solved_challenges_over_time():
     """
-    Reads challenges.json, and uses matplotlib to display a solved challenges over time graph.
+    Reads challenges.json and wallets.json, and uses matplotlib to display a graph
+    of the cumulative number of solutions from the user's wallets over time.
     """
+    try:
+        with open('wallets.json', 'r') as f:
+            wallets_data = json.load(f)
+        user_addresses = {wallet['address'] for wallet in wallets_data}
+    except (FileNotFoundError, json.JSONDecodeError, KeyError):
+        print("Warning: Could not load user wallets from wallets.json. The plot will show all solutions.")
+        user_addresses = set()
+
     try:
         with open('challenges.json', 'r') as f:
             challenges_data = json.load(f)
@@ -21,42 +30,55 @@ def plot_solved_challenges_over_time():
         print("Error: Could not decode challenges.json.")
         return
 
-    solved_challenges_times = []
+    solutions_by_time = []
     for challenge in challenges_data.values():
-        # A challenge is considered solved if 'solved_by' is not empty.
-        if challenge.get('solved_by'):
-            # The 'discovered_at' timestamp is used for the time of the challenge.
-            # The timestamp is in ISO 8601 format with timezone info, which fromisoformat can handle.
-            time_str = challenge.get("discovered_at")
-            if time_str:
-                try:
-                    # The format includes microseconds and a timezone, which datetime.fromisoformat handles well.
-                    dt_object = datetime.fromisoformat(time_str)
-                    solved_challenges_times.append(dt_object)
-                except (ValueError, TypeError):
-                    print(f"Warning: Could not parse timestamp '{time_str}' for a solved challenge.")
+        time_str = challenge.get("discovered_at")
+        if not time_str:
+            continue
 
+        solution_count = 0
+        if user_addresses:
+            # Count solutions from user's wallets
+            user_solutions = [addr for addr in challenge.get('solved_by', []) if addr in user_addresses]
+            solution_count = len(user_solutions)
+        else:
+            # Fallback to counting all solutions if user wallets aren't loaded
+            solution_count = len(challenge.get('solved_by', []))
 
-    if not solved_challenges_times:
-        print("No solved challenges with valid timestamps found to plot.")
+        if solution_count > 0:
+            try:
+                dt_object = datetime.fromisoformat(time_str)
+                solutions_by_time.append((dt_object, solution_count))
+            except (ValueError, TypeError):
+                print(f"Warning: Could not parse timestamp '{time_str}' for a challenge.")
+
+    if not solutions_by_time:
+        print("No solutions found to plot.")
         return
 
-    # Sort the timestamps chronologically
-    solved_challenges_times.sort()
+    # Sort by timestamp
+    solutions_by_time.sort(key=lambda x: x[0])
 
-    # Create cumulative counts
-    cumulative_counts = range(1, len(solved_challenges_times) + 1)
+    # Create cumulative data for plotting
+    plot_times = [item[0] for item in solutions_by_time]
+    solution_counts = [item[1] for item in solutions_by_time]
+    
+    cumulative_solutions = []
+    current_total = 0
+    for count in solution_counts:
+        current_total += count
+        cumulative_solutions.append(current_total)
 
     # Plotting
     plt.style.use('dark_background')
     fig, ax = plt.subplots(figsize=(12, 6))
 
-    ax.plot(solved_challenges_times, cumulative_counts, marker='o', linestyle='-', color='cyan')
+    ax.plot(plot_times, cumulative_solutions, marker='o', linestyle='-', color='cyan')
 
     # Formatting the plot
-    ax.set_title('Solved Challenges Over Time', color='white')
-    ax.set_xlabel('Date', color='white')
-    ax.set_ylabel('Cumulative Number of Solved Challenges', color='white')
+    ax.set_title('Cumulative Solutions by Your Wallets Over Time', color='white')
+    ax.set_xlabel('Date (of Challenge Discovery)', color='white')
+    ax.set_ylabel('Cumulative Number of Solutions', color='white')
     ax.grid(True, which='both', linestyle='--', linewidth=0.5, color='gray')
 
     # Improve date formatting on the x-axis
