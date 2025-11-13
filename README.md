@@ -181,7 +181,7 @@ The destination address **must be registered** at https://sm.midnight.gd before 
 python consolidate.py
 ```
 
-The script will prompt for confirmation before proceeding. Successfully consolidated wallets will donate all their earnings (past and future) to the destination address.
+The script will prompt for confirmation before proceeding. Successfully consolidated wallets will send all their earnings (past and future) to the destination address.
 
 **To undo consolidation:**
 ```bash
