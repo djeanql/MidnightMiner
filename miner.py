@@ -588,6 +588,7 @@ class WalletManager:
                 print(f"Mining with unregistered wallets will not earn any rewards.")
                 print(f"\nwallets.json has NOT been saved to prevent wasted mining.")
                 print(f"Please check your network connection and try again.")
+                print(f"Try using a VPN or configure proxies (see README.md).")
                 print(f"{'='*70}\n")
                 logging.error(f"Wallet registration failed: {e}")
                 sys.exit(1)
