@@ -19,11 +19,18 @@ def color_text(text, color):
     return f"{color}{text}{RESET}"
 
 
-def display_dashboard(status_dict, num_workers, wallet_manager, challenge_tracker, initial_completed, night_balance_dict, api_base):
+def display_dashboard(status_dict, num_workers, wallet_manager, challenge_tracker, initial_completed, night_balance_dict, api_base, start_time):
     """Display live dashboard - worker-centric view"""
     while True:
         try:
             time.sleep(5)
+
+            # Calculate uptime
+            uptime_seconds = (datetime.now(timezone.utc) - start_time).total_seconds()
+            uptime_hours = int(uptime_seconds // 3600)
+            uptime_minutes = int((uptime_seconds % 3600) // 60)
+            uptime_secs = int(uptime_seconds % 60)
+            uptime_str = f"{uptime_hours}h {uptime_minutes}m {uptime_secs}s"
 
             # Check if we should update NIGHT balance (once per day after 2am UTC)
             now_utc = datetime.now(timezone.utc)
@@ -49,7 +56,7 @@ def display_dashboard(status_dict, num_workers, wallet_manager, challenge_tracke
             print("="*110)
             print(f"{BOLD}{CYAN}{f'MIDNIGHT MINER - v{VERSION}':^110}{RESET}")
             print("="*110)
-            print(f"{BOLD}Active Workers: {num_workers} | Last Update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{RESET}")
+            print(f"{BOLD}Active Workers: {num_workers} | Uptime: {uptime_str} | Last Update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{RESET}")
             print("="*110)
             print()
 

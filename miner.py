@@ -115,6 +115,9 @@ def main():
     print("="*70)
     print()
 
+    # Track start time for uptime display
+    start_time = datetime.now(timezone.utc)
+
     manager = Manager()
     status_dict = manager.dict()
     failed_solutions_count = manager.Value('i', 0)
@@ -207,7 +210,7 @@ def main():
     logger.info(f"All {num_workers} workers started successfully")
 
     try:
-        display_dashboard(status_dict, num_workers, wallet_manager, challenge_tracker, initial_completed, night_balance_dict, api_base)
+        display_dashboard(status_dict, num_workers, wallet_manager, challenge_tracker, initial_completed, night_balance_dict, api_base, start_time)
     except KeyboardInterrupt:
         print("\n\nStopping all miners...")
         logger.info("Received shutdown signal, stopping all workers...")
@@ -230,7 +233,15 @@ def main():
     final_completed = wallet_manager.count_total_challenges(challenge_tracker)
     session_total_completed = final_completed - initial_completed
 
+    # Calculate uptime
+    end_time = datetime.now(timezone.utc)
+    uptime_seconds = (end_time - start_time).total_seconds()
+    uptime_hours = int(uptime_seconds // 3600)
+    uptime_minutes = int((uptime_seconds % 3600) // 60)
+    uptime_secs = int(uptime_seconds % 60)
+
     print(f"\nSession Statistics:")
+    print(f"  Uptime: {uptime_hours}h {uptime_minutes}m {uptime_secs}s")
     print(f"  New challenges solved: {session_total_completed}")
 
     if failed_solutions_count.value > 0:
