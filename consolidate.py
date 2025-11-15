@@ -98,7 +98,7 @@ def donate_wallet(destination_address, wallet_data, api_base):
                 error_json = e.response.json()
                 error_msg = error_json.get("message", "")
                 if "already has an active donation assignment" in error_msg:
-                    print(f"  ✓ Already donated to this address")
+                    print(f"  ✓ Already consolidated to this address")
                     return True
             except:
                 pass
@@ -139,7 +139,7 @@ def undo_wallet(wallet_data, api_base):
             try:
                 error_json = e.response.json()
                 if "No active donation assignment found" in error_json.get("message", ""):
-                    print(f"  ✓ Already not donated (no action needed)")
+                    print(f"  ✓ Already not consolidated (no action needed)")
                     return True
             except:
                 pass
@@ -304,10 +304,10 @@ def main():
         print(f"[{i}/{len(wallets)}] {short_addr}")
 
         if donate_wallet(destination_address, wallet, api_base):
-            print(f"  ✓ Successfully donated")
+            print(f"  ✓ Successfully consolidated")
             success_count += 1
         else:
-            print(f"  ✗ Failed to donate")
+            print(f"  ✗ Failed to consolidate")
             fail_count += 1
         print()
 
@@ -324,6 +324,9 @@ def main():
         print()
         print("If you received 'not registered' errors, make sure your")
         print("destination address is registered at: https://sm.midnight.gd")
+    else:
+        print(f"All NIGHT rewards from currently active wallets will be redeemable from: {destination_address}.")
+        print("Run this script again at the end of the scavenger hunt to consolidate any newly generated wallets.")
 
     return 0
 
