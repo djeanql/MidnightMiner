@@ -13,6 +13,8 @@ With the Midnight scavenger hunt now closed, I want to thank everyone who report
 
 **Important:** You MUST use a fresh directory for Defensio mining. If you previously mined for Midnight, either re-download this repository to a new location or delete your existing `challenges.json`, `developer-addresses.json` and `wallets.json` files.
 
+Additionally, you must consolidate to a DIFFERENT address to where you consolidated your NIGHT.
+
 **Disclaimer:** MidnightMiner is NOT AFFILIATED with the Defensio project. Engage at your own risk. The tokens may be worth nothing.
 
 ---
