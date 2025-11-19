@@ -1,12 +1,23 @@
-# Thank you for using Midnight Miner
 
-With the scavenger hunt now closed, I want to thank everyone who reported issues, made pull requests, and donated their NIGHT. Without your support, this would not have been possible!
+# Thank You for using Midnight Miner
 
-Make sure you have consolidated your rewards with the consolidation script! Soon, the claim portal will be up and you will be able to claim NIGHT with the address you consolidated to.
+With the Midnight scavenger hunt now closed, I want to thank everyone who reported issues, made pull requests, and donated their NIGHT. Without your support, this would not have been possible!
 
-If you want to keep mining: [Defensio](https://defensio.io/), a DEX building on Midnight, is also using a scavenger hunt to distribute their token. The API is compatible with the midnight scavenger hunt API, so you can use this miner for it. Just run miner.py with the `--defensio` option. You MUST re-download this repository if using this option, as your existing MidnightMiner folder will be storing previous data from the midnight scavenger hunt.
+**Important:** Make sure you have consolidated your rewards with the consolidation script! Soon, the claim portal will be up and you will be able to claim NIGHT with the address you consolidated to.
 
-MidnightMiner is NOT AFFILIATED with the Defensio project, engage at your own risk. The tokens may be worth nothing.
+## Defensio Scavenger Hunt
+
+[Defensio](https://defensio.io/), a DEX building on Midnight, is using a scavenger hunt to distribute their token. The API is compatible with the Midnight scavenger hunt API, so you can use this miner for it.
+
+**To mine DFO:** Run `python miner.py --defensio ....`
+
+**Important:** You MUST use a fresh directory for Defensio mining. If you previously mined for Midnight, either re-download this repository to a new location or delete your existing `challenges.json`, `developer-addresses.json` and `wallets.json` files.
+
+**Disclaimer:** MidnightMiner is NOT AFFILIATED with the Defensio project. Engage at your own risk. The tokens may be worth nothing.
+
+---
+<br><br>
+
 
 
 # Midnight Miner
