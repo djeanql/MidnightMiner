@@ -52,6 +52,7 @@ def main():
     donation_enabled = config['donation_enabled']
     wallets_count = config['wallets_count']
     log_api_requests = config['log_api_requests']
+    use_defensio_api = config['use_defensio_api']
 
     # Enable API request logging if flag is set
     if log_api_requests:
@@ -65,6 +66,8 @@ def main():
     print(f"  Developer donations: {'Enabled (5%)' if donation_enabled else 'Disabled'}")
     if log_api_requests:
         print(f"  API request logging: Enabled")
+    if use_defensio_api:
+        print(f"  API Base: https://mine.defensio.io/api (Defensio)")
     print()
 
     logger.info(f"Configuration: workers={num_workers}, wallets_to_ensure={wallets_count}")
@@ -94,8 +97,12 @@ def main():
         if not dev_addresses:
             dev_addresses = FALLBACK_DEVELOPER_WALLETS
 
-    wallet_manager = WalletManager(wallets_file)
+    wallet_manager = WalletManager(wallets_file, use_defensio_api)
     api_base = API_BASE
+
+    if use_defensio_api:
+        api_base = "https://mine.defensio.io/api"
+        api_client.API_BASE = api_base
 
     # Load existing wallets or create enough for specified wallet count
     wallets = wallet_manager.load_or_create_wallets(wallets_count, api_base, donation_enabled)
@@ -130,6 +137,23 @@ def main():
 
     initial_completed = wallet_manager.count_total_challenges(challenge_tracker)
     print(f"✓ Initial challenges completed: {initial_completed}")
+
+    # Verify we can fetch challenges from API before starting workers
+    print("\nVerifying API connectivity...")
+    test_challenge = api_client.get_current_challenge(api_base)
+    if test_challenge is None:
+        print()
+        print("="*70)
+        print("ERROR: Cannot retrieve current challenge from API")
+        print("="*70)
+        print(f"API Base: {api_base}")
+        print("\nThe API may be down or unreachable.")
+        print("Please check your internet connection and try again later.")
+        print("="*70)
+        logger.error("Failed to retrieve current challenge on startup - API unavailable")
+        return 1
+
+    print(f"✓ API connectivity verified (challenge: {test_challenge['challenge_id'][:20]}...)")
 
     print()
     print("="*70)
@@ -180,7 +204,14 @@ def main():
                             break
 
             if wallet is None:
-                # No available wallet found, create a new one
+                # No available wallet found - check if API is accessible before creating new wallet
+                # This prevents infinite wallet creation when API is down
+                api_challenge = api_client.get_current_challenge(api_base)
+                if api_challenge is None:
+                    logger.warning(f"Worker {worker_id}: Cannot spawn - API unreachable and no available wallets with unsolved challenges")
+                    return None
+
+                # API is accessible, safe to create a new wallet
                 logger.info(f"No available wallets for worker {worker_id}, creating new wallet")
                 wallet = wallet_manager.create_new_wallet(api_base)
                 logger.info(f"Created new wallet {wallet['address'][:20]}... for worker {worker_id}")

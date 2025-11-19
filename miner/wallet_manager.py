@@ -17,10 +17,11 @@ from .file_utils import backup_wallets_file
 class WalletManager:
     """Manages Cardano wallet generation, storage, and signing"""
 
-    def __init__(self, wallet_file="wallets.json"):
+    def __init__(self, wallet_file="wallets.json", use_defensio_api=False):
         self.wallet_file = wallet_file
         self.wallets = []
         self._lock = threading.Lock()
+        self.use_defensio_api = use_defensio_api
 
     def generate_wallet(self):
         signing_key = PaymentSigningKey.generate()
@@ -37,7 +38,7 @@ class WalletManager:
         }
 
     def sign_terms(self, wallet_data, api_base):
-        message = get_terms_and_conditions(api_base)
+        message = get_terms_and_conditions(api_base, self.use_defensio_api)
 
         signing_key_bytes = bytes.fromhex(wallet_data['signing_key'])
         signing_key = PaymentSigningKey.from_primitive(signing_key_bytes)

@@ -4,12 +4,16 @@ import json
 import time
 import logging
 from proxy_config import create_proxy_session, RotatingSession
+from miner.config import API_BASE as CONFIG_API_BASE
 
 # Initialize HTTP session with proxy support
 HTTP_SESSION, PROXY_ENTRIES = create_proxy_session()
 
 # Flag to enable API request logging (set by main process)
 LOG_API_REQUESTS = False
+
+# API Base URL, can be overridden by main process
+API_BASE = CONFIG_API_BASE
 
 
 def _get_proxy_display():
@@ -100,14 +104,15 @@ def get_current_challenge(api_base):
     return None
 
 
-def get_terms_and_conditions(api_base):
-    """Get terms and conditions message from API"""
+def get_terms_and_conditions(api_base, use_defensio_api=False):
+    """Get terms and conditions message from API or return Defensio specific string"""
+    if use_defensio_api:
+        return "I agree to abide by the terms and conditions as described in version 1-0 of the Defensio DFO mining process: 2da58cd94d6ccf3d933c4a55ebc720ba03b829b84033b4844aafc36828477cc0"
     try:
         response = http_get(f"{api_base}/TandC")
         return response.json()["message"]
     except:
-        # Fallback message
-        return "I agree to abide by the terms and conditions as described in version 1-0 of the Midnight scavenger mining process: 281ba5f69f4b943e3fb8a20390878a232787a04e4be22177f2472b63df01c200"
+        return "I agree to abide by the terms and conditions as described in version 1-0 of the Midnight scavenger mining process: 281ba5f69f4b943e3fb8a20390878a232787a04e4be221777f2472b63df01c200"
 
 
 def get_wallet_statistics(wallet_address, api_base):

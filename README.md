@@ -1,3 +1,14 @@
+# Thank you for using Midnight Miner
+
+With the scavenger hunt now closed, I want to thank everyone who reported issues, made pull requests, and donated their NIGHT. Without your support, this would not have been possible!
+
+Make sure you have consolidated your rewards with the consolidation script! Soon, the claim portal will be up and you will be able to claim NIGHT with the address you consolidated to.
+
+If you want to keep mining: [Defensio](https://defensio.io/), a DEX building on Midnight, is also using a scavenger hunt to distribute their token. The API is compatible with the midnight scavenger hunt API, so you can use this miner for it. Just run miner.py with the `--defensio` option. You MUST re-download this repository if using this option, as your existing MidnightMiner folder will be storing previous data from the midnight scavenger hunt.
+
+MidnightMiner is NOT AFFILIATED with the Defensio project, engage at your own risk. The tokens may be worth nothing.
+
+
 # Midnight Miner
 
 A Python-based mining bot for the Midnight Network's scavenger hunt, allowing users to automatically mine for NIGHT tokens with multiple wallets.
