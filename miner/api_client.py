@@ -94,7 +94,6 @@ def fetch_developer_addresses(count, existing_addresses=None):
 def get_current_challenge(api_base):
     """Get current challenge from API"""
     try:
-        print(f"{api_base}/challenge")
         response = http_get(f"{api_base}/challenge")
         response.raise_for_status()
         data = response.json()
