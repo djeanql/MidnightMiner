@@ -218,7 +218,7 @@ def main():
             # Assign dev address statically based on worker_id
             dev_address = dev_addresses[worker_id % len(dev_addresses)]
 
-            p = Process(target=worker_process, args=(wallet, worker_id, status_dict, challenges_file, dev_address, failed_solutions_count, failed_solutions_lock, donation_enabled))
+            p = Process(target=worker_process, args=(wallet, worker_id, status_dict, challenges_file, dev_address, failed_solutions_count, failed_solutions_lock, donation_enabled, api_base))
             p.start()
             workers[worker_id] = (p, wallet)
             logger.info(f"Started worker {worker_id} with wallet {wallet['address'][:20]}...")
