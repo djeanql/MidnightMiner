@@ -49,6 +49,7 @@ def main():
     wallets_count = config['wallets_count']
     log_api_requests = config['log_api_requests']
     use_defensio_api = config['use_defensio_api']
+    consolidate_address = config['consolidate_address']
 
     # Enable API request logging if flag is set
     if log_api_requests:
@@ -60,6 +61,8 @@ def main():
     print(f"  Wallets file: {wallets_file}")
     print(f"  Challenges file: {challenges_file}")
     print(f"  Developer donations: {'Enabled (5%)' if donation_enabled else 'Disabled'}")
+    if consolidate_address:
+        print(f"  Consolidate to: {consolidate_address}")
     if log_api_requests:
         print(f"  API request logging: Enabled")
     if use_defensio_api:
@@ -93,7 +96,7 @@ def main():
         if not dev_addresses:
             dev_addresses = FALLBACK_DEVELOPER_WALLETS
 
-    wallet_manager = WalletManager(wallets_file, use_defensio_api)
+    wallet_manager = WalletManager(wallets_file, use_defensio_api, consolidate_address)
     api_base = API_BASE
 
     if use_defensio_api:

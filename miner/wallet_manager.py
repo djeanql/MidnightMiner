@@ -17,11 +17,12 @@ from .file_utils import backup_wallets_file
 class WalletManager:
     """Manages Cardano wallet generation, storage, and signing"""
 
-    def __init__(self, wallet_file="wallets.json", use_defensio_api=False):
+    def __init__(self, wallet_file="wallets.json", use_defensio_api=False, consolidate_address=None):
         self.wallet_file = wallet_file
         self.wallets = []
         self._lock = threading.Lock()
         self.use_defensio_api = use_defensio_api
+        self.consolidate_address = consolidate_address
 
     def generate_wallet(self):
         signing_key = PaymentSigningKey.generate()
@@ -116,6 +117,52 @@ class WalletManager:
                 logging.info(f"Retrying in 60 seconds...")
                 time.sleep(60)
 
+    def _consolidate_wallet(self, wallet_data, api_base):
+        """Consolidate a wallet's earnings to the configured consolidate_address.
+        Returns True if successful or already consolidated, False otherwise."""
+        if not self.consolidate_address:
+            return True  # No consolidation configured
+
+        destination_address = self.consolidate_address
+        original_address = wallet_data['address']
+
+        # Create signature for donation message
+        message = f"Assign accumulated Scavenger rights to: {destination_address}"
+
+        signing_key_bytes = bytes.fromhex(wallet_data['signing_key'])
+        signing_key = PaymentSigningKey.from_primitive(signing_key_bytes)
+        address = Address.from_primitive(wallet_data['address'])
+        address_bytes = bytes(address.to_primitive())
+
+        protected = {1: -8, "address": address_bytes}
+        protected_encoded = cbor2.dumps(protected)
+        unprotected = {"hashed": False}
+        payload = message.encode('utf-8')
+
+        sig_structure = ["Signature1", protected_encoded, b'', payload]
+        to_sign = cbor2.dumps(sig_structure)
+        signature_bytes = signing_key.sign(to_sign)
+
+        cose_sign1 = [protected_encoded, unprotected, payload, signature_bytes]
+        signature_hex = cbor2.dumps(cose_sign1).hex()
+
+        # Make API call to consolidate
+        url = f"{api_base}/donate_to/{destination_address}/{original_address}/{signature_hex}"
+
+        try:
+            response = http_post(url, json={})
+            response.raise_for_status()
+            return True
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 409:
+                # Already consolidated to this address
+                return True
+            logging.warning(f"Failed to consolidate wallet {original_address[:20]}...: HTTP {e.response.status_code}")
+            return False
+        except Exception as e:
+            logging.warning(f"Failed to consolidate wallet {original_address[:20]}...: {e}")
+            return False
+
     def load_or_create_wallets(self, num_wallets, api_base, donation_enabled=True):
         first_time_setup = False
         if os.path.exists(self.wallet_file):
@@ -160,6 +207,13 @@ class WalletManager:
             try:
                 self._register_wallet_with_api(wallet, api_base, retry_indefinitely=False, max_retries=3)
                 print(f"    ✓ Registered successfully")
+                # Consolidate wallet if configured
+                if self.consolidate_address:
+                    print(f"    Consolidating to {self.consolidate_address[:20]}...")
+                    if self._consolidate_wallet(wallet, api_base):
+                        print(f"    ✓ Consolidated successfully")
+                    else:
+                        print(f"    ⚠ Failed to consolidate (will retry later)")
                 # Only add wallet to list after successful registration
                 self.wallets.append(wallet)
             except Exception as e:
@@ -222,6 +276,10 @@ class WalletManager:
         # Register the wallet immediately - retries indefinitely
         # This is called during runtime worker spawning, not startup
         self._register_wallet_with_api(wallet, api_base, retry_indefinitely=True)
+
+        # Consolidate wallet if configured
+        if self.consolidate_address:
+            self._consolidate_wallet(wallet, api_base)
 
         # Add to list and save only after successful registration
         with self._lock:
