@@ -94,11 +94,17 @@ git clone https://github.com/djeanql/MidnightMiner && cd MidnightMiner
    - On Windows (CMD):
      ```bash
      venv\Scripts\activate
+	 ```
    
-   - On Windows Powershell: (may need to escalate permission: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser)
+   - On Windows Powershell:
      ```bash
      .\venv\Scripts\Activate.ps1
      ```
+	 *Note: if you are NOT running running powershell as administrator, you will get an error about permission to run scripts and will 
+	 need to escalate permission*: 
+	 ```bash
+	 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+	 ```
 
 3. **Install required dependencies**:
    ```bash
