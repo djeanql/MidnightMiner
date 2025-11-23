@@ -55,7 +55,7 @@ def main():
     log_api_requests = config['log_api_requests']
     use_defensio_api = config['use_defensio_api']
     consolidate_address = config['consolidate_address']
-    use_paralel = config['use_paralel']
+    use_parallel = config['use_parallel']
 
     # Enable API request logging if flag is set
     if log_api_requests:
@@ -73,7 +73,7 @@ def main():
         print(f"  API request logging: Enabled")
     if use_defensio_api:
         print(f"  API Base: https://mine.defensio.io/api (Defensio)")
-    if use_paralel:
+    if use_parallel:
         print(f"  Parallel library: Enabled")
     print()
 
